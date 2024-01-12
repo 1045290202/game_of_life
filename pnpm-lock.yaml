@@ -31,6 +31,9 @@ devDependencies:
   npm-run-all2:
     specifier: ^6.1.1
     version: 6.1.1
+  prettier:
+    specifier: ^3.1.1
+    version: 3.1.1
   typescript:
     specifier: ~5.3.0
     version: 5.3.3
@@ -1235,6 +1238,12 @@ packages:
       nanoid: 3.3.7
       picocolors: 1.0.0
       source-map-js: 1.0.2
+
+  /prettier@3.1.1:
+    resolution: {integrity: sha512-22UbSzg8luF4UuZtzgiUOfcGM8s4tjBv6dJRT7j275NXsy2jb4aJa4NNveul5x4eqlF1wuhuR2RElK71RvmVaw==, tarball: https://registry.npmmirror.com/prettier/-/prettier-3.1.1.tgz}
+    engines: {node: '>=14'}
+    hasBin: true
+    dev: true
 
   /read-pkg@8.1.0:
     resolution: {integrity: sha512-PORM8AgzXeskHO/WEv312k9U03B8K9JSiWF/8N9sUuFjBa+9SF2u6K7VClzXwDXab51jCd8Nd36CNM+zR97ScQ==, tarball: https://registry.npmmirror.com/read-pkg/-/read-pkg-8.1.0.tgz}

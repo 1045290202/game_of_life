@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import GameCanvasVm from "@/components/GameCanvasVm.vue";
+import AppView from "./App.vue";
 </script>
 
 <template>
-    <GameCanvasVm />
+    <AppView />
 </template>
 
 <style scoped></style>
