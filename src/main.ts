@@ -2,9 +2,9 @@ import "./assets/main.css";
 
 import { createApp } from "vue";
 import { createPinia } from "pinia";
-import AppVm from "@/AppVm.vue";
+import App from "@/App.vue";
 
-const app = createApp(AppVm);
+const app = createApp(App);
 
 app.use(createPinia());
 app.mount("#app");

@@ -1,68 +1,195 @@
 <script setup lang="ts">
-import { nextTick, onMounted, ref, watch, watchEffect } from "vue";
-import GameOfLife from "@/script/GameOfLife";
+import { onMounted } from "vue";
+import GameManager from "@/script/GameManager";
+import UIManager from "@/script/UIManager";
 
-const props = defineProps<{
-    onCellClick: (col: number, row: number) => void;
-}>();
+const cellSizeRef = UIManager.getInstance().cellSizeRef;
+const horizontalCellCountRef = UIManager.getInstance().horizontalCellCountRef;
+const verticalCellCountRef = UIManager.getInstance().verticalCellCountRef;
+const intervalRef = UIManager.getInstance().intervalRef;
 
-const cellSize: number = 8;
-const cellPadding: number = 1;
-const canvasRef = ref<HTMLCanvasElement | null>(null);
-const canvasSize = ref<[number, number]>([0, 0]);
+let isMouseDown = false;
 
-async function refresh() {
-    const canvas = canvasRef.value;
-    if (!canvas) {
-        return;
-    }
-    const ctx = canvas.getContext("2d");
-    if (!ctx) {
-        return;
-    }
-    const cells = GameOfLife.getInstance().cells;
-    canvasSize.value = [cells.length * cellSize, cells.length * cellSize];
-    await nextTick();
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#000";
-    const size = cellSize - cellPadding * 2;
-    for (let i = 0; i < cells.length; i++) {
-        for (let j = 0; j < cells[i].length; j++) {
-            if (cells[i][j]) {
-                ctx.fillRect(i * cellSize + cellPadding, j * cellSize + cellPadding, size, size);
-            }
-        }
-    }
-}
-
-function onCanvasClick(event: MouseEvent) {
+function onCanvasMouseDown(event: MouseEvent) {
     event.preventDefault();
     event.stopPropagation();
-    // 找到点击的格子
-    const canvas = canvasRef.value;
-    if (!canvas) {
+    isMouseDown = true;
+}
+
+function onCanvasMouseUp(event: MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    isMouseDown = false;
+    UIManager.getInstance().onCanvasClick(event);
+}
+
+function onCanvasMouseMove(event: MouseEvent) {
+    if (!isMouseDown) {
         return;
     }
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-    const i = Math.floor(x / cellSize);
-    const j = Math.floor(y / cellSize);
-    props.onCellClick(i, j);
+    event.preventDefault();
+    event.stopPropagation();
+    UIManager.getInstance().onCanvasClick(event);
+}
+
+function onCreateCellsEnd() {
+    onPauseButtonClick();
+    UIManager.getInstance().resetCanvasSize();
+    UIManager.getInstance().clearCanvas();
+    UIManager.getInstance().drawBorders();
+    UIManager.getInstance().drawCells();
+}
+
+function onResetButtonClick() {
+    GameManager.getInstance().createEmptyCells(
+        UIManager.getInstance().horizontalCellCount,
+        UIManager.getInstance().verticalCellCount,
+    );
+    onCreateCellsEnd();
+}
+
+function onRandomButtonClick() {
+    GameManager.getInstance().createRandomCells(
+        UIManager.getInstance().horizontalCellCount,
+        UIManager.getInstance().verticalCellCount,
+    );
+    onCreateCellsEnd();
+}
+
+function onGospaMachineGunButtonClick() {
+    GameManager.getInstance().createGospaMachineGunCells(
+        UIManager.getInstance().horizontalCellCount,
+        UIManager.getInstance().verticalCellCount,
+    );
+    onCreateCellsEnd();
+}
+
+let timer: number | undefined;
+
+function onStartButtonClick() {
+    onPauseButtonClick();
+    timer = setInterval(() => {
+        GameManager.getInstance().update();
+        UIManager.getInstance().drawCells();
+    }, UIManager.getInstance().interval);
+}
+
+function onPauseButtonClick() {
+    clearInterval(timer);
+    timer = undefined;
+}
+
+function onEvolveButtonClick() {
+    GameManager.getInstance().update();
+    UIManager.getInstance().drawCells();
 }
 
 onMounted(() => {
-    GameOfLife.getInstance().registerOnRefresh(refresh);
+    UIManager.getInstance().init(document.querySelector("#gameCanvas") as HTMLCanvasElement);
+    GameManager.getInstance().createEmptyCells(
+        UIManager.getInstance().horizontalCellCount,
+        UIManager.getInstance().verticalCellCount,
+    );
+    UIManager.getInstance().resetCanvasSize();
+    UIManager.getInstance().clearCanvas();
+    // UIManager.getInstance().drawCells();
+    // GameOfLife.getInstance().registerOnRefresh(refresh);
 });
 </script>
 
 <template>
-    <canvas ref="canvasRef" :width="canvasSize[0]" :height="canvasSize[1]" @click.left="onCanvasClick"></canvas>
+    <div class="functions">
+        <div class="labels">
+            <label for="cellSize">
+                单元格大小：
+                <input type="number" id="cellSize" v-model="cellSizeRef" min="1" />
+            </label>
+            <label for="width">
+                宽度（格）：
+                <input type="number" id="width" v-model="horizontalCellCountRef" min="1" max="1000" />
+            </label>
+            <label for="height">
+                高度（格）：
+                <input type="number" id="height" v-model="verticalCellCountRef" min="1" max="1000" />
+            </label>
+            <label for="interval">
+                更新间隔：
+                <input type="number" id="interval" v-model="intervalRef" min="0" step="10" />
+            </label>
+        </div>
+        <div class="buttons">
+            <button @click="onResetButtonClick">重置</button>
+            <button @click="onRandomButtonClick">随机</button>
+            <button @click="onGospaMachineGunButtonClick">高斯帕机枪</button>
+            <button @click="onStartButtonClick">开始</button>
+            <button @click="onPauseButtonClick">暂停</button>
+            <button @click="onEvolveButtonClick">进化</button>
+        </div>
+    </div>
+    <div class="canvas_wrapper">
+        <canvas
+            id="gameCanvas"
+            @mousedown="onCanvasMouseDown"
+            @mouseup="onCanvasMouseUp"
+            @mousemove="onCanvasMouseMove"
+        ></canvas>
+    </div>
 </template>
 
 <style scoped>
 canvas {
     border: 1px solid #000;
+}
+
+.labels,
+.buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 1em;
+}
+
+.labels > label:not(:last-child) {
+    margin: 0 1em 0 0;
+}
+
+.labels input {
+    width: 5em;
+    border: 1px solid #c5c5c5;
+    border-radius: 0.5em;
+    padding: 0.3em 0 0.3em 0.8em;
+}
+
+.labels input:focus {
+    outline: 1px solid #a8a8a8;
+}
+
+.buttons > button:not(:last-child) {
+    margin: 0 1em 0 0;
+}
+
+.buttons > button {
+    border: 1px solid #c5c5c5;
+    border-radius: 0.5em;
+    background-color: #fff;
+    padding: 0.3em 0.8em;
+    transition: background-color 0.1s ease-in-out;
+}
+
+.buttons > button:hover {
+    background-color: #efefef;
+}
+
+.buttons > button:active {
+    background-color: #e1e1e1;
+}
+
+.canvas_wrapper {
+    display: flex;
+}
+
+#gameCanvas {
+    margin: 0 auto;
 }
 </style>
