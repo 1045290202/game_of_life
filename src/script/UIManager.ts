@@ -21,7 +21,7 @@ export default class UIManager extends Singleton {
     // 背景颜色
     backgroundColor: string = "#ffffff";
     // 细胞边框颜色
-    cellBorderColor: string = "#969696";
+    cellBorderColor: string = "#c5c5c5";
     // 横向细胞数量
     horizontalCellCount: number = 80;
     // 纵向细胞数量
@@ -73,8 +73,8 @@ export default class UIManager extends Singleton {
             return;
         }
         this.clearCanvas();
-        this._canvas.width = this.horizontalCellCount * this.cellSize;
-        this._canvas.height = this.verticalCellCount * this.cellSize;
+        this._canvas.width = this.horizontalCellCount * this.cellSize + this.cellPadding;
+        this._canvas.height = this.verticalCellCount * this.cellSize + this.cellPadding;
     }
 
     clearCanvas() {
@@ -100,15 +100,18 @@ export default class UIManager extends Singleton {
         const canvas = this._canvas;
         const ctx = this._ctx;
         ctx.strokeStyle = this.cellBorderColor;
-        ctx.lineWidth = 1;
+        ctx.lineWidth = this.cellPadding;
         ctx.beginPath();
-        for (let i = 1; i <= this.horizontalCellCount; i++) {
-            ctx.moveTo(i * this.cellSize + 0.5, 0);
-            ctx.lineTo(i * this.cellSize + 0.5, canvas.height);
+        const halfCellPadding = this.cellPadding / 2;
+        for (let i = 0; i <= this.horizontalCellCount; i++) {
+            const lineX = i * this.cellSize + halfCellPadding;
+            ctx.moveTo(lineX, 0);
+            ctx.lineTo(lineX, canvas.height);
         }
-        for (let i = 1; i <= this.verticalCellCount; i++) {
-            ctx.moveTo(0, i * this.cellSize + 0.5);
-            ctx.lineTo(canvas.width, i * this.cellSize + 0.5);
+        for (let i = 0; i <= this.verticalCellCount; i++) {
+            const lineY = i * this.cellSize + halfCellPadding;
+            ctx.moveTo(0, lineY);
+            ctx.lineTo(canvas.width, lineY);
         }
         ctx.stroke();
     }
@@ -120,11 +123,12 @@ export default class UIManager extends Singleton {
         const ctx = this._ctx;
         const size = this.cellSize - this.cellPadding;
         const borderWidth = this.cellPadding;
-        ctx.fillStyle = this.cellColor;
         if (!cell.isAlive) {
-            ctx.clearRect(cell.x * this.cellSize + borderWidth, cell.y * this.cellSize + borderWidth, size, size);
+            ctx.fillStyle = this.backgroundColor;
+            ctx.fillRect(cell.x * this.cellSize + borderWidth, cell.y * this.cellSize + borderWidth, size, size);
             return;
         }
+        ctx.fillStyle = this.cellColor;
         ctx.fillRect(cell.x * this.cellSize + borderWidth, cell.y * this.cellSize + borderWidth, size, size);
     }
 
@@ -144,12 +148,13 @@ export default class UIManager extends Singleton {
         const ctx = this._ctx;
         const size = this.cellSize - this.cellPadding;
         const borderWidth = this.cellPadding;
-        ctx.fillStyle = this.cellColor;
         for (const cell of changedCellSet) {
             if (!cell.isAlive) {
-                ctx.clearRect(cell.x * this.cellSize + borderWidth, cell.y * this.cellSize + borderWidth, size, size);
+                ctx.fillStyle = this.backgroundColor;
+                ctx.fillRect(cell.x * this.cellSize + borderWidth, cell.y * this.cellSize + borderWidth, size, size);
                 continue;
             }
+            ctx.fillStyle = this.cellColor;
             ctx.fillRect(cell.x * this.cellSize + borderWidth, cell.y * this.cellSize + borderWidth, size, size);
         }
 

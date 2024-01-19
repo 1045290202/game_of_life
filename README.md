@@ -1,40 +1,21 @@
-# game_of_life
+# 康威生命游戏
 
-This template should help get you started developing with Vue 3 in Vite.
+## 规则
 
-## Recommended IDE Setup
+百度百科解释：
+> 1. 当前细胞为死亡状态时，当周围有3个存活细胞时，则迭代后该细胞变成存活状态(模拟繁殖)；若原先为生，则保持不变。
+> 2. 当前细胞为存活状态时，当周围的邻居细胞低于两个(不包含两个)存活时，该细胞变成死亡状态(模拟生命数量稀少)。
+> 3. 当前细胞为存活状态时，当周围有两个或3个存活细胞时，该细胞保持原样。
+> 4. 当前细胞为存活状态时，当周围有3个以上的存活细胞时，该细胞变成死亡状态(模拟生命数量过多)。
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+## 算法
 
-## Type Support for `.vue` Imports in TS
+并非遍历所有细胞，而是提前记录生存的细胞，每一帧计算下一帧时它们自己和周围细胞的生存状态，并记录下状态改变的细胞。等到下一帧时遍历状态改变的细胞，并将它们绘制到Canvas上。
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin) to make the TypeScript language service aware of `.vue` types.
+简单来说就是：遍历生存细胞和其邻居，重绘变化的细胞。
 
-If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has also implemented a [Take Over Mode](https://github.com/johnsoncodehk/volar/discussions/471#discussioncomment-1361669) that is more performant. You can enable it by the following steps:
+此算法在活细胞数量较少时效率较高，但当活细胞数量较多时，效率会降低。
 
-1. Disable the built-in TypeScript Extension
-    1) Run `Extensions: Show Built-in Extensions` from VSCode's command palette
-    2) Find `TypeScript and JavaScript Language Features`, right click and select `Disable (Workspace)`
-2. Reload the VSCode window by running `Developer: Reload Window` from the command palette.
+## 体验链接
 
-## Customize configuration
-
-See [Vite Configuration Reference](https://vitejs.dev/config/).
-
-## Project Setup
-
-```sh
-pnpm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-pnpm dev
-```
-
-### Type-Check, Compile and Minify for Production
-
-```sh
-pnpm build
-```
+[康威生命游戏](https://1045290202.github.io/game_of_life/)

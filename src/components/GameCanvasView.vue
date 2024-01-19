@@ -11,12 +11,18 @@ const intervalRef = UIManager.getInstance().intervalRef;
 let isMouseDown = false;
 
 function onCanvasMouseDown(event: MouseEvent) {
+    if (event.button !== 0) {
+        return;
+    }
     event.preventDefault();
     event.stopPropagation();
     isMouseDown = true;
 }
 
 function onCanvasMouseUp(event: MouseEvent) {
+    if (event.button !== 0) {
+        return;
+    }
     event.preventDefault();
     event.stopPropagation();
     isMouseDown = false;
@@ -24,6 +30,9 @@ function onCanvasMouseUp(event: MouseEvent) {
 }
 
 function onCanvasMouseMove(event: MouseEvent) {
+    if (event.button !== 0) {
+        return;
+    }
     if (!isMouseDown) {
         return;
     }
@@ -127,20 +136,18 @@ onMounted(() => {
         </div>
     </div>
     <div class="canvas_wrapper">
-        <canvas
-            id="gameCanvas"
-            @mousedown="onCanvasMouseDown"
-            @mouseup="onCanvasMouseUp"
-            @mousemove="onCanvasMouseMove"
-        ></canvas>
+        <div class="canvas_holder">
+            <canvas
+                id="gameCanvas"
+                @mousedown="onCanvasMouseDown"
+                @mouseup="onCanvasMouseUp"
+                @mousemove="onCanvasMouseMove"
+            ></canvas>
+        </div>
     </div>
 </template>
 
 <style scoped>
-canvas {
-    border: 1px solid #000;
-}
-
 .labels,
 .buttons {
     display: flex;
@@ -187,6 +194,13 @@ canvas {
 
 .canvas_wrapper {
     display: flex;
+}
+
+.canvas_holder {
+    margin: 0 auto;
+    border: 1px solid #c5c5c5;
+    padding: 0.75em;
+    border-radius: 0.5em;
 }
 
 #gameCanvas {
